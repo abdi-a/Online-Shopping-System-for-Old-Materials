@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import api from '@/lib/axios';
+import DashboardNav from '@/components/DashboardNav';
 
 export default function BuyerDashboard() {
   const [orders, setOrders] = useState<any[]>([]);
@@ -33,6 +34,8 @@ export default function BuyerDashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
+      <DashboardNav role="buyer" />
+      
       {/* Header */}
       <div className="bg-white shadow-sm border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
