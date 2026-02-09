@@ -4,22 +4,22 @@ import api from '@/lib/axios';
 
 export default function SellerDashboard() {
   const [products, setProducts] = useState<any[]>([]);
+  const [orders, setOrders] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<any>(null);
   const [formData, setFormData] = useState({
-      name: '', category: 'Metal', condition: 'Used', price: 0, quantity: 1, description: ''
-  });
-
-  useEffect(() => {
-    api.get('/my-products').then(res => setProducts(res.data));
+    name: '', 
+    category: 'Metal', 
+    condition: 'Used', 
+    price: '', 
+    quantity: '', 
+    description: '',
+    image:t(() => {
+    loadProducts();
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-      e.preventDefault();
-      await api.post('/products', formData);
-      alert('Product Added!');
-      // Refresh list
-      api.get('/my-products').then(res => setProducts(res.data));
-  };
-
+  const l
   return (
     <div className="p-8">
       <h1 className="text-3xl font-bold mb-6">Seller Dashboard</h1>
