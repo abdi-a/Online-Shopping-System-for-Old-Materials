@@ -9,15 +9,8 @@ return new class extends Migration
     public function up(): void
     {
         // Users table usually exists by default, but we need to ensure the 'role' column
-        Schema::create('users', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('email')->unique();
-            $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
-            $table->enum('role', ['buyer', 'seller', 'admin'])->default('buyer');
-            $table->rememberToken();
-            $table->timestamps();
+        Schema::table('users', function (Blueprint $table) {
+            $table->enum('role', ['buyer', 'seller', 'admin'])->default('buyer')->after('password');
         });
 
         Schema::create('products', function (Blueprint $table) {
@@ -65,6 +58,9 @@ return new class extends Migration
         Schema::dropIfExists('order_items');
         Schema::dropIfExists('orders');
         Schema::dropIfExists('products');
-        Schema::dropIfExists('users');
+        
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropColumn('role');
+        });
     }
 };

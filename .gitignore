@@ -1,0 +1,29 @@
+# Dependency directories
+node_modules/
+vendor/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Next.js build output
+.next/
+out/
+build/
+dist/
+
+# Laravel storage
+/backend/storage/*.key
+/backend/public/storage
+/backend/public/hot
+/backend/storage/debugbar
+/backend/storage/framework/cache/data/*
+/backend/storage/framework/sessions/*
+/backend/storage/framework/testing/*
+/backend/storage/framework/views/*
+/backend/storage/logs/*
+
+# System files
+.DS_Store
+Thumbs.db
