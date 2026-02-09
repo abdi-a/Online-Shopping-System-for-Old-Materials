@@ -9,6 +9,44 @@ export default function ProductsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedCondition, setSelectedCondition] = useState('All');
+  const [cartCount, setCartCount] = useState(0);
+
+  const addToCart = (product: any) => {
+    // Get existing cart from localStorage
+    const existingCart = localStorage.getItem('cart');
+    let cart = existingCart ? JSON.parse(existingCart) : [];
+
+    // Check if product already in cart
+    const existingItemIndex = cart.findIndex((item: any) => item.product_id === product.id);
+
+    if (existingItemIndex > -1) {
+      // Increment quantity
+      cart[existingItemIndex].quantity += 1;
+    } else {
+      // Add new item
+      cart.push({
+        product_id: product.id,
+        product: product,
+        quantity: 1,
+        price: parseFloat(product.price)
+      });
+    }
+
+    // Save to localStorage
+    localStorage.setItem('cart', JSON.stringify(cart));
+    setCartCount(cart.length);
+    
+    // Show success message
+    alert(`${product.name} added to cart!`);
+  };
+
+  useEffect(() => {
+    // Load cart count on mount
+    const cart = localStorage.getItem('cart');
+    if (cart) {
+      setCartCount(JSON.parse(cart).length);
+    }
+  }, []);
 
   useEffect(() => {
     loadProducts();
@@ -173,7 +211,10 @@ export default function ProductsPage() {
                         <p className="text-2xl font-bold text-indigo-600">${product.price}</p>
                         <p className="text-xs text-slate-500">per unit</p>
                       </div>
-                      <button className="bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white px-4 py-2 rounded-lg font-medium shadow-md transform hover:scale-105 transition-all duration-200 flex items-center space-x-2">
+                      <button 
+                        onClick={() => addToCart(product)}
+                        className="bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white px-4 py-2 rounded-lg font-medium shadow-md transform hover:scale-105 transition-all duration-200 flex items-center space-x-2"
+                      >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                         </svg>
