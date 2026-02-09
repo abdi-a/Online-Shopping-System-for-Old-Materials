@@ -33,6 +33,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/products/{id}', [ProductController::class, 'destroy']);
     Route::get('/my-products', [ProductController::class, 'myProducts']);
     Route::get('/seller/orders', [OrderController::class, 'sellerOrders']);
+    Route::put('/orders/{id}', [OrderController::class, 'update']);
 
     // Admin Routes
     Route::middleware('can:admin')->group(function () {

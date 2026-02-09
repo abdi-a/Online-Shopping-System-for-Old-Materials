@@ -111,3 +111,29 @@ class OrderController extends Controller
         return response()->json($orders);
     }
 }
+
+    
+    // Seller: Update order status (confirm/reject)
+    public function update(Request $request, $id)
+    {
+        $order = Order::findOrFail($id);
+        
+        // Check if user is the seller of products in this order
+        $sellerId = $request->user()->id;
+        $hasSellerProducts = $order->items()->whereHas('product', function($q) use ($sellerId) {
+            $q->where('seller_id', $sellerId);
+        })->exists();
+        
+        if (!$hasSellerProducts && $request->user()->role !== 'admin') {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+        
+        $request->validate([
+            'status' => 'required|in:confirmed,rejected,cancelled'
+        ]);
+        
+        $order->update(['status' => $request->status]);
+        
+        return response()->json($order);
+    }
+}
