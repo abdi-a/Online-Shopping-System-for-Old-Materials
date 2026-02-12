@@ -5,21 +5,40 @@ import DashboardLayout from '@/components/DashboardLayout';
 
 export default function BuyerDashboard() {
   const [orders, setOrders] = useState<any[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadOrders();
+    loadData();
   }, []);
 
-  const loadOrders = async () => {
+  const loadData = async () => {
     try {
-      const res = await api.get('/my-orders');
-      setOrders(res.data || []);
+      const [ordersRes, productsRes] = await Promise.all([
+        api.get('/my-orders'),
+        api.get('/products')
+      ]);
+      setOrders(ordersRes.data || []);
+      setProducts(productsRes.data?.data || productsRes.data || []);
     } catch (error) {
-      console.error('Error loading orders:', error);
+      console.error('Error loading data:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  const addToCart = (product: any) => {
+    const cart = JSON.parse(localStorage.getItem('cart') || '[]');
+    const existingItem = cart.find((item: any) => item.id === product.id);
+    
+    if (existingItem) {
+      existingItem.quantity += 1;
+    } else {
+      cart.push({ ...product, quantity: 1 });
+    }
+    
+    localStorage.setItem('cart', JSON.stringify(cart));
+    alert('Product added to cart!');
   };
 
   const getStatusColor = (status: string) => {
@@ -111,6 +130,83 @@ export default function BuyerDashboard() {
                   </svg>
                 </div>
               </div>
+            </div>
+          </div>
+
+          {/* Available Products Section */}
+          <div className="bg-white rounded-xl shadow-lg overflow-hidden mb-8">
+            <div className="px-6 py-5 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-xl font-bold text-slate-900">Available Products</h2>
+                  <p className="text-sm text-slate-600 mt-1">Browse and add products to your cart</p>
+                </div>
+                <button 
+                  onClick={() => window.location.href = '/products'}
+                  className="text-indigo-600 hover:text-indigo-700 font-medium text-sm flex items-center space-x-1"
+                >
+                  <span>View All</span>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <div className="p-6">
+              {products.length === 0 ? (
+                <div className="text-center py-12">
+                  <svg className="mx-auto h-16 w-16 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                  </svg>
+                  <h3 className="mt-4 text-lg font-medium text-slate-900">No products available</h3>
+                  <p className="mt-2 text-slate-600">Check back later for new listings</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {products.slice(0, 6).map((product: any) => (
+                    <div key={product.id} className="border border-slate-200 rounded-xl overflow-hidden hover:shadow-lg transition-all duration-200 transform hover:-translate-y-1">
+                      <div className="bg-gradient-to-br from-slate-100 to-slate-200 h-48 flex items-center justify-center">
+                        <svg className="w-20 h-20 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                        </svg>
+                      </div>
+                      <div className="p-4">
+                        <div className="flex items-start justify-between mb-2">
+                          <h3 className="font-bold text-slate-900 text-lg">{product.name}</h3>
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
+                            {product.category}
+                          </span>
+                        </div>
+                        <p className="text-sm text-slate-600 mb-3 line-clamp-2">{product.description}</p>
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                            {product.condition}
+                          </span>
+                          <span className="text-sm text-slate-600">Stock: {product.quantity}</span>
+                        </div>
+                        <div className="flex items-center justify-between pt-3 border-t border-slate-200">
+                          <p className="text-2xl font-bold text-indigo-600">${product.price}</p>
+                          <button 
+                            onClick={() => addToCart(product)}
+                            disabled={product.quantity === 0}
+                            className={`px-4 py-2 rounded-lg font-medium text-sm transition-all duration-200 flex items-center space-x-2 ${
+                              product.quantity === 0 
+                                ? 'bg-slate-300 text-slate-500 cursor-not-allowed' 
+                                : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-md hover:shadow-lg transform hover:scale-105'
+                            }`}
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                            <span>{product.quantity === 0 ? 'Out of Stock' : 'Add to Cart'}</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 

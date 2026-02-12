@@ -110,8 +110,6 @@ class OrderController extends Controller
 
         return response()->json($orders);
     }
-}
-
     
     // Seller: Update order status (confirm/reject)
     public function update(Request $request, $id)

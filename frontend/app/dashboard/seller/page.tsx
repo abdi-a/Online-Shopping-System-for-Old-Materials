@@ -9,6 +9,7 @@ export default function SellerDashboard() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: '', 
     category: 'Metal', 
@@ -24,14 +25,16 @@ export default function SellerDashboard() {
 
   const loadData = async () => {
     try {
+      setError(null);
       const [productsRes, ordersRes] = await Promise.all([
         api.get('/my-products'),
         api.get('/seller/orders')
       ]);
       setProducts(productsRes.data || []);
       setOrders(ordersRes.data || []);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error loading data:', error);
+      setError(error.response?.data?.message || 'Failed to load data. Please try logging in again.');
     } finally {
       setLoading(false);
     }
@@ -67,6 +70,14 @@ export default function SellerDashboard() {
       description: product.description,
     });
     setShowForm(true);
+    
+    // Scroll to form after a short delay to ensure it's rendered
+    setTimeout(() => {
+      const formElement = document.getElementById('product-form');
+      if (formElement) {
+        formElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 100);
   };
 
   const handleDelete = async (id: number) => {
@@ -136,6 +147,24 @@ export default function SellerDashboard() {
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Error Message */}
+          {error && (
+            <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4 flex items-start space-x-3">
+              <svg className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <div className="flex-1">
+                <p className="text-sm font-medium text-red-800">{error}</p>
+                <button 
+                  onClick={loadData}
+                  className="mt-2 text-sm text-red-600 hover:text-red-700 underline"
+                >
+                  Try again
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-xl shadow-lg p-6 text-white transform hover:scale-105 transition-transform duration-200">
@@ -197,7 +226,7 @@ export default function SellerDashboard() {
 
           {/* Add/Edit Product Form */}
           {showForm && (
-            <div className="bg-white rounded-xl shadow-lg p-6 mb-8 border border-slate-200">
+            <div id="product-form" className="bg-white rounded-xl shadow-lg p-6 mb-8 border border-slate-200">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold text-slate-900">
                   {editingProduct ? 'Edit Product' : 'Add New Product'}
@@ -206,6 +235,7 @@ export default function SellerDashboard() {
                   onClick={() => {
                     setShowForm(false);
                     setEditingProduct(null);
+                    setFormData({ name: '', category: 'Metal', condition: 'Used', price: '', quantity: '', description: '' });
                   }}
                   className="text-slate-400 hover:text-slate-600"
                 >
@@ -305,71 +335,71 @@ export default function SellerDashboard() {
             </div>
           )}
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Products List */}
-            <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-              <div className="px-6 py-5 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-white">
-                <h2 className="text-xl font-bold text-slate-900">My Products</h2>
-                <p className="text-sm text-slate-600 mt-1">Manage your product listings</p>
-              </div>
-              <div className="p-6 max-h-[600px] overflow-y-auto">
-                {products.length === 0 ? (
-                  <div className="text-center py-12">
-                    <svg className="mx-auto h-16 w-16 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                    </svg>
-                    <h3 className="mt-4 text-lg font-medium text-slate-900">No products yet</h3>
-                    <p className="mt-2 text-slate-600">Start by adding your first product</p>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {products.map((product: any) => (
-                      <div key={product.id} className="border border-slate-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <h3 className="font-bold text-slate-900 text-lg">{product.name}</h3>
-                            <p className="text-sm text-slate-600 mt-1">{product.description}</p>
-                            <div className="flex items-center space-x-4 mt-3">
-                              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
-                                {product.category}
-                              </span>
-                              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                {product.condition}
-                              </span>
-                              <span className="text-sm text-slate-600">Qty: {product.quantity}</span>
-                            </div>
+          {/* My Products Section */}
+          <div className="bg-white rounded-xl shadow-lg overflow-hidden mb-8">
+            <div className="px-6 py-5 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-white">
+              <h2 className="text-xl font-bold text-slate-900">My Products</h2>
+              <p className="text-sm text-slate-600 mt-1">All your listed products</p>
+            </div>
+            <div className="p-6">
+              {products.length === 0 ? (
+                <div className="text-center py-12">
+                  <svg className="mx-auto h-16 w-16 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                  </svg>
+                  <h3 className="mt-4 text-lg font-medium text-slate-900">No products yet</h3>
+                  <p className="mt-2 text-slate-600">Start by adding your first product</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {products.map((product: any) => (
+                    <div key={product.id} className="border border-slate-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <h3 className="font-bold text-slate-900 text-lg">{product.name}</h3>
+                          <p className="text-sm text-slate-600 mt-1">{product.description}</p>
+                          <div className="flex items-center space-x-4 mt-3">
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
+                              {product.category}
+                            </span>
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                              {product.condition}
+                            </span>
+                            <span className="text-sm text-slate-600">Qty: {product.quantity}</span>
                           </div>
-                          <div className="text-right ml-4">
-                            <p className="text-2xl font-bold text-emerald-600">${product.price}</p>
-                            <div className="flex items-center space-x-2 mt-3">
-                              <button 
-                                onClick={() => handleEdit(product)}
-                                className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                                title="Edit"
-                              >
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                </svg>
-                              </button>
-                              <button 
-                                onClick={() => handleDelete(product.id)}
-                                className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                                title="Delete"
-                              >
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                </svg>
-                              </button>
-                            </div>
+                        </div>
+                        <div className="text-right ml-4">
+                          <p className="text-2xl font-bold text-emerald-600">${product.price}</p>
+                          <div className="flex items-center space-x-2 mt-3">
+                            <button 
+                              onClick={() => handleEdit(product)}
+                              className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                              title="Edit"
+                            >
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                              </svg>
+                            </button>
+                            <button 
+                              onClick={() => handleDelete(product.id)}
+                              className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                              title="Delete"
+                            >
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                            </button>
                           </div>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
+          </div>
 
+          <div className="grid grid-cols-1 lg:grid-cols-1 gap-8">
             {/* Orders List */}
             <div className="bg-white rounded-xl shadow-lg overflow-hidden">
               <div className="px-6 py-5 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-white">

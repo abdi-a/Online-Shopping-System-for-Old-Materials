@@ -57,12 +57,25 @@ export default function Sidebar({ role }: SidebarProps) {
 
   const currentMenuItems = menuItems[role];
 
+  // Role-based gradient backgrounds
+  const sidebarGradient = {
+    admin: 'bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600',
+    buyer: 'bg-gradient-to-br from-blue-600 via-cyan-600 to-teal-600',
+    seller: 'bg-gradient-to-br from-emerald-600 via-green-600 to-lime-600'
+  };
+
+  const logoGradient = {
+    admin: 'bg-gradient-to-br from-pink-500 to-rose-500',
+    buyer: 'bg-gradient-to-br from-cyan-500 to-blue-500',
+    seller: 'bg-gradient-to-br from-lime-500 to-green-500'
+  };
+
   return (
     <>
       {/* Mobile Toggle Button */}
       <button
         onClick={() => setIsCollapsed(!isCollapsed)}
-        className="lg:hidden fixed top-4 left-4 z-50 bg-white p-2 rounded-lg shadow-lg"
+        className={`lg:hidden fixed top-4 left-4 z-50 p-2 rounded-lg shadow-lg ${sidebarGradient[role]} text-white`}
       >
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
@@ -71,45 +84,45 @@ export default function Sidebar({ role }: SidebarProps) {
 
       {/* Sidebar */}
       <div
-        className={`fixed left-0 top-0 h-full bg-white shadow-xl border-r border-slate-200 transition-all duration-300 z-40 ${
+        className={`fixed left-0 top-0 h-full ${sidebarGradient[role]} shadow-2xl transition-all duration-300 z-40 ${
           isCollapsed ? '-translate-x-full lg:translate-x-0 lg:w-20' : 'translate-x-0 w-64'
         }`}
       >
         {/* Logo */}
-        <div className="h-16 flex items-center justify-between px-4 border-b border-slate-200">
+        <div className="h-16 flex items-center justify-between px-4 border-b border-white border-opacity-20">
           {!isCollapsed && (
             <div className="flex items-center space-x-3">
-              <div className="bg-gradient-to-br from-indigo-600 to-purple-600 rounded-lg p-2">
+              <div className="bg-white bg-opacity-20 rounded-lg p-2 shadow-lg backdrop-blur-sm">
                 <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                 </svg>
               </div>
               <div>
-                <p className="text-sm font-bold text-slate-900">Old Materials</p>
-                <p className="text-xs text-slate-500 uppercase">{role}</p>
+                <p className="text-sm font-bold text-white">Old Materials</p>
+                <p className="text-xs text-white text-opacity-80 uppercase">{role}</p>
               </div>
             </div>
           )}
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="hidden lg:block p-1 hover:bg-slate-100 rounded"
+            className="hidden lg:block p-1 hover:bg-white hover:bg-opacity-20 rounded transition-colors"
           >
-            <svg className="w-5 h-5 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={isCollapsed ? "M9 5l7 7-7 7" : "M15 19l-7-7 7-7"} />
             </svg>
           </button>
         </div>
 
         {/* User Info */}
-        <div className="p-4 border-b border-slate-200">
+        <div className="p-4 border-b border-white border-opacity-20">
           <div className="flex items-center space-x-3">
-            <div className="h-10 w-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-semibold flex-shrink-0">
+            <div className="h-10 w-10 rounded-full bg-white bg-opacity-20 backdrop-blur-sm flex items-center justify-center text-white font-semibold flex-shrink-0">
               {userName.charAt(0).toUpperCase()}
             </div>
             {!isCollapsed && (
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-slate-900 truncate">{userName}</p>
-                <p className="text-xs text-slate-500">Online</p>
+                <p className="text-sm font-semibold text-white truncate">{userName}</p>
+                <p className="text-xs text-white text-opacity-80">Online</p>
               </div>
             )}
           </div>
@@ -126,8 +139,8 @@ export default function Sidebar({ role }: SidebarProps) {
                     onClick={() => router.push(item.path)}
                     className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${
                       isActive
-                        ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg'
-                        : 'text-slate-700 hover:bg-slate-100'
+                        ? 'bg-white bg-opacity-20 backdrop-blur-sm text-white shadow-lg'
+                        : 'text-white text-opacity-90 hover:bg-white hover:bg-opacity-10'
                     }`}
                     title={isCollapsed ? item.name : ''}
                   >
@@ -143,10 +156,10 @@ export default function Sidebar({ role }: SidebarProps) {
         </nav>
 
         {/* Bottom Actions */}
-        <div className="p-4 border-t border-slate-200 space-y-2">
+        <div className="p-4 border-t border-white border-opacity-20 space-y-2">
           <button
             onClick={() => router.push('/settings')}
-            className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-slate-700 hover:bg-slate-100 transition-colors"
+            className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-white text-opacity-90 hover:bg-white hover:bg-opacity-10 transition-colors"
             title={isCollapsed ? 'Settings' : ''}
           >
             <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -157,7 +170,7 @@ export default function Sidebar({ role }: SidebarProps) {
           </button>
           <button
             onClick={handleLogout}
-            className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 transition-colors"
+            className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg bg-red-500 bg-opacity-20 text-white hover:bg-red-500 hover:bg-opacity-30 transition-colors"
             title={isCollapsed ? 'Logout' : ''}
           >
             <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
